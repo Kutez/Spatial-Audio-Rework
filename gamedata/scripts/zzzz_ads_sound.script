@@ -1,0 +1,73 @@
+local aimming = false
+local order 
+
+function print(a,...)
+	if type(a)=="table" then
+		printf("ze table\n%s", utils_data.print_table(a, false, true))
+	else
+		printf(tostring(a))
+	end
+end
+
+function get_wp_sec(parent)
+	local wpn = db.actor:active_item()
+	if parent then
+		if not (IsStalker(parent) and parent:alive()) then return end
+		wpn = parent:active_item()
+	end
+	local sec
+	if wpn then
+		sec = wpn:section()
+	end
+	return sec
+end
+
+function actor_on_weapon_zoom_in()
+	aimming = true
+end
+
+function actor_on_weapon_zoom_out( ... )
+	aimming = false
+end
+
+function isIndoor()
+	if env_actorsnd and env_actorsnd.score and env_gunsnd_mcm and env_gunsnd_mcm.mcm_setup then
+		if env_actorsnd.score>env_gunsnd_mcm.mcm_setup.new_threshold[1] then
+			return true
+		end
+	end
+	return false
+end
+
+local snds_callback = {
+	sndShot = "snd_shoot_actor_ads",
+	sndShotActor = "snd_shoot_actor_ads",
+	sndSilencerShot = "snd_silncer_shot_actor_ads",
+	sndSilencerShotActor = "snd_silncer_shot_actor_ads",
+
+	sndShotActorFirst = "snd_shoot_actor_first_ads",
+	sndSilencerShotActorFirst = "snd_silncer_shot_actor_first_ads_indoor",
+}
+
+function on_before_play_hud_sound(alias, parent, result)
+	if parent:id() == AC_ID and aimming then
+		if not isIndoor() then
+			if alias and snds_callback[alias] and ini_sys:r_string_ex(get_wp_sec(),snds_callback[alias]) then
+				result.section = get_wp_sec()
+				result.line = snds_callback[alias]
+			end
+		else
+			if alias and snds_callback[alias] and ini_sys:r_string_ex(get_wp_sec(),snds_callback[alias].."_indoor") then
+				result.section = get_wp_sec()
+				result.line = snds_callback[alias].."_indoor"
+				result.volume_mult = env_actorsnd.score*env_actorsnd.volume 
+			end
+		end
+	end
+end
+
+function on_game_start()
+	RegisterScriptCallback("on_before_play_hud_sound",on_before_play_hud_sound)
+	RegisterScriptCallback("actor_on_weapon_zoom_out",actor_on_weapon_zoom_out)
+	RegisterScriptCallback("actor_on_weapon_zoom_in",actor_on_weapon_zoom_in)
+end

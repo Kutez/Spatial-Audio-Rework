@@ -1,0 +1,74 @@
+local mcm_settings = sar_main_mcm.mcm_settings
+
+------------------------
+function print(a,...)
+	if mcm_settings.dbug[1] then
+		if type(a)=="table" then
+			printf("ze table\n%s", utils_data.print_table(a, false, true))
+		else
+			printf(tostring(a))
+		end
+	end
+end
+
+function get_wp_sec(parent)
+	local wpn = db.actor:active_item()
+	if parent then
+		wpn = parent:active_item()
+	end
+	local sec
+	if wpn then
+		sec = wpn:section()
+	end
+	return sec
+end
+
+local indoor_snds_callback = {
+	sndShot = "snd_shoot",
+	sndShotActor = "snd_shoot_actor",
+	sndSilencerShot = "snd_silncer_shot",
+	sndSilencerShotActor = "snd_silncer_shot_actor",
+
+	sndShotActorFirst = "snd_shoot_actor_first",
+	sndSilencerShotActorFirst = "snd_silncer_shoot_actor_first",
+
+	sndShotMisfire = "snd_shot_misfire",
+	sndShotMisfireActor = "snd_shot_misfire_actor",
+	sndSilencerShotMisfire = "snd_silncer_shot_misfire",
+	sndSilencerShotMisfireActor = "snd_silncer_shot_misfire_actor",
+}
+
+function returnSoundSectionName(alias,section,parent)
+	if not parent or not section then return end
+	if indoor_snds_callback[alias] and SYS_GetParam(0, section, indoor_snds_callback[alias].."_indoor") then return indoor_snds_callback[alias].."_indoor" end
+	if alias == "sndSilencerShot" then
+		if SYS_GetParam(0, section, "snd_silncer_shoot_indoor") then return "snd_silncer_shoot_indoor" end
+	end
+	if parent:id() == AC_ID then
+		if string.find(alias,"Actor") then
+			local cus_alias = string.gsub(alias,"Actor","")
+			if indoor_snds_callback[cus_alias] and SYS_GetParam(0, section, indoor_snds_callback[cus_alias].."_indoor") then return indoor_snds_callback[cus_alias].."_indoor" end
+		else
+			local cus_alias = alias.."Actor"
+			if indoor_snds_callback[cus_alias] and SYS_GetParam(0, section, indoor_snds_callback[cus_alias].."_indoor") then return indoor_snds_callback[cus_alias].."_indoor" end
+		end
+	end
+end
+
+function on_before_play_hud_sound(alias, parent, result)
+	local section = get_wp_sec(parent)
+	local line = returnSoundSectionName(alias,section,parent)
+	if section and line then
+		local score = sar_main_mcm.current_score
+		local lenghts = sar_main_mcm.current_lenght
+		if score>mcm_settings.upper_threshold[1] then
+			result.volume_mult = mcm_settings.volume[1]
+			result.section = section
+			result.line = line
+		end
+	end
+end
+
+function on_game_start()
+	RegisterScriptCallback("on_before_play_hud_sound",on_before_play_hud_sound)
+end

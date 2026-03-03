@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+<string_table>
+	<string id="ui_mcm_menu_spatial_audio">
+		<text>Spatial Audio Rework</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_enable">
+		<text>Enable</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_tick_interval">
+		<text>Tick Interval (in ms)</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_interpolation_interval">
+		<text>Interpolation Interval</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_length_interpolation_interval">
+		<text>Length Interpolation Interval</text>
+	</string>
+		<string id="ui_mcm_spatial_audio_interpolation_interval_desc">
+		<text>Interpolation time from room size value to another. shorter time will result in sharper jump in value, this is to prevent the effect from jitter too much</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_volume">
+		<text>Volume</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_ray_bounce_count">
+		<text>Ray Bounce Count</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_npc_ray_bounce_count">
+		<text>NPC Ray Bounce Count</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_ray_length_mult">
+		<text>Ray lengTh</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_dbug">
+		<text>Debug Mode</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_ray_dbug">
+		<text>Ray Debug Mode</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_show_replaced_sound">
+		<text>Show Replaced Sound</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_upper_threshold">
+		<text>Upper Threshold</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_upper_threshold_desc">
+		<text>If indoor score (the amount of ray hit) is above this threshold, the effect will be one full value and the custom indoor sound will play</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_lower_threshold">
+		<text>Lower Threshold</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_lower_threshold_desc">
+		<text>If indoor score (the amount of ray hit) is above this threshold, the reverb affect will start affecting the sound</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_small_preset">
+		<text>Small Room Preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_small_preset_desc">
+		<text>Reverb preset to use in small room</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_small_strength">
+		<text>Small Preset Strength</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_small_strength_desc">
+		<text>Basically how "reverb" the effect is, 0 is no reverb at all, 1 is the effect will be on full</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_small_length">
+		<text>Distance for small preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_small_length_desc">
+		<text>If the ray hit points distance to the player is smaller than this, small preset will play</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_mid_preset">
+		<text>Medium Room Preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_mid_preset_desc">
+		<text>Reverb preset to use in medium room</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_mid_strength">
+		<text>Medium Preset Strength</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_mid_strength_desc">
+		<text>Basically how "reverb" the effect is, 0 is no reverb at all, 1 is the effect will be on full</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_mid_length">
+		<text>Distance for medium preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_mid_length_desc">
+		<text>If the ray hit points distance to the player is equal to this, medium preset will play in full</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_large_preset">
+		<text>Large Room Preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_large_preset_desc">
+		<text>Reverb preset to use in large room</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_large_strength">
+		<text>Large Preset Strength</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_large_strength_desc">
+		<text>Basically how "reverb" the effect is, 0 is no reverb at all, 1 is the effect will be on full</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_large_length">
+		<text>Distance for large preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_large_length_desc">
+		<text>If the ray hit points distance to the player is equal or larger than this, large preset will play in full</text>
+	</string>
+
+	<string id="ui_mcm_spatial_audio_outdoor_preset">
+		<text>Outdoor Preset</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_outdoor_preset_desc">
+		<text>Reverb preset to use for outdoors (usually no reverb at all)</text>
+	</string>
+	
+	<string id="ui_mcm_spatial_audio_desc_ray">
+		<text>Rays Settings</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_threshold">
+		<text>Threshold Settings - How sensitive is the detection</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_preset">
+		<text>Presets Settings - Reverb effect related settings, you can find preset name and how to make custom one in sar_reverb_preset.script inside gamedata/script</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_dbug">
+		<text>Dev shits</text>
+	</string>
+</string_table>

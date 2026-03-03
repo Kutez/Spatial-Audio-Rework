@@ -1,0 +1,424 @@
+local last_tick = 0
+volume = 0
+current_score = 0
+current_length = 0
+local epsilon = 0.01
+
+----{pitch,yaw,length,length priority,indoor detection priority,player's yaw indepentdent} in degree, length priority == 0 mean no contribute to lengths calculation
+local ray_dir_configs = {
+ ----------------- length ray ---------------
+	{0,		5,		180,		2,0,true},
+	{30, 	8,		180,		2,0,true},
+	{-30, 	8,		180,		2,0,true},
+	{150, 	8,		180,		2,0,true},
+	{-150, 	8,		180,		2,0,true},
+	{180, 	8,		180,		2,0,true},
+}
+
+local pre_ray_dir_configs = {
+	{0,		60,		120,		0.2,2,true},
+	{0,		90,		80,			0.2,3,true},
+	{90,	60,		120,		0.2,2,true},
+	{-90,	60,		120,		0.2,2,true},
+	{180,	60,		120,		0.2,2,true},
+}
+
+local per_bouce_ray_dir_config = {
+	{0,90,50}
+}
+
+local material_black_list = {
+	"water",
+	"bush",
+	"tree",
+}
+
+local lengthMultPerBouce = {1,0.9,0.8,0.7,0.65}
+
+local underground_levels = {"jupiter_underground", "l03u_agr_underground", "l08u_brainlab", "l13_generators", "labx8", "l12u_sarcofag", "l10u_bunker", "l04u_labx18"}
+---------------------MCM
+mcm_settings = {
+	enable = {true, "check",nil,nil,nil,order = 1},
+	volume = {3, "track",0,5,0.1,order = 2},
+	tick_interval = {350, "track",100,1000,10,order = 4},
+	interpolation_interval = {1200, "track",100,2000,100,order = 5},
+	length_interpolation_interval = {750, "track",100,2000,100,order = 6},
+
+	div_ray = {nil,"line", order = 8},
+	desc_ray = {nil,"desc", order = 9},
+
+	ray_bounce_count = {3, "track",2,5,1,order = 13},
+	ray_length_mult = {1.5, "track",0.25,5,0.05,order = 15},
+
+	div_threshold = {nil,"line", order = 48},
+	desc_threshold = {nil,"desc", order = 49},
+
+	upper_threshold = {0.7,"track",0,1,0.05, order = 50},
+	lower_threshold = {0.4,"track",0,1,0.05, order = 51},
+
+	div_preset = {nil,"line", order = 69},
+	desc_preset = {nil,"desc", order = 70},
+
+	small_preset = {"FACTORY_SMALLROOM","input",0,nil,nil, order = 71},
+	small_strength = {0.75,"track",0,1,0.025, order = 71.5},
+	small_length = {7,"track",3,12,1, order = 72},
+
+	mid_preset = {"FACTORY_MEDIUMROOM","input",0,nil,nil, order = 73},
+	mid_strength = {1,"track",0,1,0.025, order = 73.5},
+	mid_length = {12,"track",5,16,1, order = 74},
+	
+	large_preset = {"FACTORY_LARGEROOM","input",0,nil,nil, order = 75},
+	large_strength = {1,"track",0,1,0.025, order = 75.5},
+	large_length = {18,"track",10,24,1, order = 76},
+	
+	outdoor_preset = {"NO_REVERB","input",0,nil,nil, order = 77},
+	div_dbug = {nil,"line", order = 88},
+	desc_dbug = {nil,"desc", order = 89},
+
+	dbug = {false, "check",nil,nil,nil,order = 99},
+	ray_dbug = {false, "check",nil,nil,nil,order = 100},
+	show_replaced_sound = {false, "check",nil,nil,nil,order = 101}
+}
+
+function get_mcm_val(i)
+	if i == "input" then
+		return 0
+	end
+	if i == "check" then
+		return 1
+	end
+	if i == "track" then
+		return 2
+	end
+	return
+end
+
+function on_mcm_load()
+	local sorted_order = {}
+	for i,v in pairs(mcm_settings) do
+		sorted_order[#sorted_order+1] = v.order
+	end
+	table.sort(sorted_order)
+	local set = {{id = "title", type = "slide", text = "ui_mcm_menu_spatial_audio", size = {512, 50}, spacing = 20},}
+	for i,v in pairs(mcm_settings) do
+		local option = {id = i,type = v[2], val = get_mcm_val(v[2]), min = v[3], max = v[4], step = v[5], def = v[1], text = "ui_mcm_spatial_audio_"..i, clr = {200, 200, 255, 255}}
+		set[table_find(sorted_order,v.order)+1] = option
+	end
+	return {id = "spatial_audio", sh=true, gr = set}
+end
+
+function on_option_change(mcm)
+	if not mcm then return end
+	for i,v in pairs(mcm_settings) do
+		if v[2]~="desc" and v[2]~="line"  then
+			mcm_settings[i][1] = ui_mcm.get("spatial_audio/"..i)
+		end
+	end
+end
+------------------------
+local function print(a,...)
+	if not mcm_settings.dbug[1] then return end
+	local type_ = type
+	if type_(a)=="table" then
+		printf("ze table\n%s", utils_data.print_table(a, false, true))
+	elseif type_(a) == "string" or type_(a) == "number" or type_(a) == "boolean" or type_(a) == "nil" then
+		printf(tostring(a))
+	elseif type_(a) == "userdata" then
+		if a.x and a.y and a.z then
+			printf("("..a.x.." , "..a.y.." , "..a.z..") ")
+		end
+	end
+end
+
+local sys_param_types = {
+    string = 0,
+    boolean = 1,
+    number = 2
+}
+
+function table_find(t,f)
+	for i,v in pairs(t) do
+		if v == f then
+			return i
+		end
+	end
+end
+
+function getAvg(tabl)
+	local s = 0
+	for i = 1,#tabl do
+		s = s+tabl[i]
+	end
+	return s/#tabl
+end
+
+function getSummationForLength(n)
+	local s = 0
+	for i = 1,n do
+		s = s+lengthMultPerBouce[i]
+	end
+	return s
+end
+
+function getSummation(n)
+	return n*(n+1)*0.5
+end
+
+function toRad(a)
+	return a* 0.017453292519943295769236907684886
+end
+
+function getActorPos()
+	local pos = db.actor:position()
+	if IsMoveState("mcCrouch") and IsMoveState("mcAccel") then -- Prone
+		pos.y = pos.y + 0.4
+	elseif IsMoveState("mcCrouch") then
+		pos.y = pos.y + 1.2
+	else
+		pos.y = pos.y + 1.6
+	end
+	return vector():set(pos)
+end
+
+function clamp(x, min, max)
+  return x < min and min or (x > max and max or x)
+end
+
+function get_wp_sec(parent)
+	local wpn = db.actor:active_item()
+	if parent then
+		wpn = parent:active_item()
+	end
+	local sec
+	if wpn then
+		sec = wpn:section()
+	end
+	return sec
+end
+
+function isBlackListedMaterial(m)
+	for i = 1,#material_black_list do
+		if string.find(m,material_black_list[i]) then
+			return true
+		end
+	end
+	return false
+end
+
+function lerp(a,b,alpha)
+	return (1-alpha)*a+alpha*b
+end
+--------------------------
+function actor_on_first_update(wpn,gun)
+	last_tick = time_global()
+	score = 0
+	volume = mcm_settings.volume[1]
+	exec_console_cmd("snd_efx " .. 1)
+	exec_console_cmd("snd_efx_reverb_overwrite " .. 1)
+	on_option_change(true)
+end
+
+function fireRay(dir,length,max_bounce,fire_pos,dont_check)
+	local pos = fire_pos or getActorPos()
+	local point = 0
+	local total_length = 0
+	local bounced = 0
+	for bounce = 1,max_bounce do
+		local ray_args = {
+			ray_range = length*(1/bounce)*mcm_settings.ray_length_mult[1],
+			contact_range = length*(1/bounce)*mcm_settings.ray_length_mult[1]-0.1,
+			flags = (2),
+			ignore_object = db.actor,
+			visualize = mcm_settings.ray_dbug[1]
+		}
+		local ray = demonized_geometry_ray.geometry_ray(ray_args)
+		local result = ray:get(vector():set(pos), dir)
+
+		-- This loop checks if the contact surface is a bush, and re-casts the ray just inside it if it is -- By Ujtan
+		while result.in_contact and result.result.material_name and isBlackListedMaterial(result.result.material_name) do
+			ray_args.ray_range = ray_args.ray_range - result.distance
+			ray_args.contact_range = ray_args.contact_range - result.distance
+			ray = demonized_geometry_ray.geometry_ray(ray_args)
+			local new_pos = vector():set(result.position):add(vector():set(dir):mul(0.5))
+			result = ray:get(new_pos, dir)
+		end
+
+		if result.in_contact then
+			if not dont_check then
+				local check_score = 0
+				for i,v in pairs(per_bouce_ray_dir_config) do
+					local score, length = fireRay(vector():setHP(toRad(v[1]), toRad(v[2])), v[3],1, vector():sub(result.position,vector():set(0,0.5,0)),true)
+					check_score = check_score+score
+				end
+				if check_score/#per_bouce_ray_dir_config<0.6 then
+					break
+				end
+			end
+			point = point+bounce
+			total_length = total_length+result.position:distance_to(getActorPos())*lengthMultPerBouce[bounce]
+			bounced = bounced + 1
+			local surface_normal = demonized_geometry_ray.get_surface_normal(pos,dir,nil,nil,result)
+			if surface_normal then
+				dir = vector():reflect(dir, surface_normal)
+			else
+				break
+			end
+			pos = result.position
+		else
+			break
+		end
+	end
+	return point/getSummation(max_bounce),(bounced == 0 and length) or total_length/getSummationForLength(bounced)
+end
+
+function isIndoorThroughRaycast()
+	local pos = getActorPos()
+	local dir = device().cam_dir:normalize()
+	local horz = dir:getH() -- Range 0 2pi
+	local vert = dir:getP()
+
+	local pointSum = 0
+	local lengthSum = 0
+	local pointsMultSum = 0
+	local lengthsMultSum = 0
+
+	for i,v in pairs(pre_ray_dir_configs) do
+		local point
+		local length
+		local new_dir = vector():setHP(horz + toRad(v[1]), toRad(v[2]) + vert)
+		if v[6] then
+        	new_dir = vector():setHP(horz + toRad(v[1]), toRad(v[2]))
+		end
+		point,length = fireRay(new_dir:normalize(),v[3],mcm_settings.ray_bounce_count[1])
+
+		pointSum = pointSum+point*pre_ray_dir_configs[i][5]
+		lengthSum = lengthSum+length*point*pre_ray_dir_configs[i][4]
+
+		pointsMultSum = pointsMultSum+pre_ray_dir_configs[i][5]
+		lengthsMultSum = lengthsMultSum+pre_ray_dir_configs[i][4]
+	end
+	if pointSum/pointsMultSum<0.5 then return 0,0 end
+
+	for i,v in pairs(ray_dir_configs) do
+		local point
+		local length
+		local new_dir = vector():setHP(horz + toRad(v[1]), toRad(v[2]) + vert)
+		if v[6] then
+        	new_dir = vector():setHP(horz + toRad(v[1]), toRad(v[2]))
+		end
+		point,length = fireRay(new_dir:normalize(),v[3],mcm_settings.ray_bounce_count[1])
+
+		pointSum = pointSum+point*ray_dir_configs[i][5]
+		lengthSum = lengthSum+length*point*ray_dir_configs[i][4]
+
+		pointsMultSum = pointsMultSum+ray_dir_configs[i][5]
+		lengthsMultSum = lengthsMultSum+ray_dir_configs[i][4]
+	end
+
+	return pointSum/pointsMultSum,lengthSum/lengthsMultSum
+end
+
+function getPreset(input)
+	if type(input) == "table" then
+		return input
+	elseif type(input) == "string" then
+		local preset = sar_reverb_preset.ReverbPresets[input]
+		if not preset then
+			getPreset("GENERIC")
+			printf("! PRESET "..input.." NOT FOUND, PLEASE TYPE THE PRESET NAME CORRECTLY, SWTICHED TO GENERIC PRESET INSTEAD")
+		else
+			return preset
+		end
+	end
+end
+
+function loadReverb(preset)
+	for i,v in pairs(getPreset(preset)) do
+		exec_console_cmd("snd_efx_reverb_overwrite_" .. i .. " " .. v)
+	end
+end
+
+function lerpReverb(preset1,preset2,alpha)
+	preset1 = getPreset(preset1)
+	preset2 = getPreset(preset2)
+	local lerped_preset = {}
+	for i,v in pairs(preset1) do
+		lerped_preset[i] = lerp(preset1[i],preset2[i],alpha)
+	end
+	return lerped_preset
+end
+
+function actor_on_update()
+	if not mcm_settings.enable[1] then return end
+	if mcm_settings.ray_dbug[1] then return end
+	if (time_global() - last_tick)<mcm_settings.tick_interval[1] then return end
+	--------------------
+	local score
+	local length
+	score,length = isIndoorThroughRaycast()
+	local new_score = 0
+	if score>mcm_settings.lower_threshold[1] then
+		new_score = (score-mcm_settings.lower_threshold[1])/(1-mcm_settings.lower_threshold[1])
+		if new_score>mcm_settings.upper_threshold[1] then
+			new_score = 1
+		end
+	end
+
+	if (new_score-current_score)<0 and current_score<0.25 then
+		current_score = 0
+	elseif (new_score-current_score)>0 and current_score>0.9 then
+		current_score = 1
+	else
+		current_score = current_score+(new_score-current_score)*0.98*(mcm_settings.tick_interval[1]/mcm_settings.interpolation_interval[1])
+	end
+
+	if current_score<epsilon then
+		current_score = 0
+	elseif current_score>1-epsilon then
+		current_score = 1
+	end
+
+	current_length = math.max(epsilon,current_length+(length-current_length)*0.98*(mcm_settings.tick_interval[1]/mcm_settings.length_interpolation_interval[1]))
+
+	local preset_order = {"outdoor","small","mid","large"}
+
+	for i,type in pairs(preset_order) do
+		local next_type = (i<#preset_order and preset_order[i+1]) or "large"
+		local length_delta = (type=="outdoor" and 1) or (current_length-mcm_settings[type.."_length"][1])/(mcm_settings[next_type.."_length"][1]-mcm_settings[type.."_length"][1])
+		-- fucking hell
+		if current_length < mcm_settings[next_type.."_length"][1] then
+			loadReverb(
+				lerpReverb(mcm_settings.outdoor_preset[1],
+					lerpReverb(mcm_settings.outdoor_preset[1],
+						lerpReverb(mcm_settings[type.."_preset"][1],mcm_settings[next_type.."_preset"][1], length_delta)
+					, (type == "outdoor" and mcm_settings[next_type.."_strength"][1]) or lerp(mcm_settings[type.."_strength"][1],mcm_settings[next_type.."_strength"][1],length_delta))
+				, current_score))
+			break
+		end
+	end
+	print("score: "..tostring(current_score))
+	print(current_length)
+	------------------
+	last_tick = time_global()
+end
+
+function actor_on_weapon_before_fire()
+	if not mcm_settings.enable[1] then return end
+	if not mcm_settings.ray_dbug[1] then return end
+	if (time_global() - last_tick)<mcm_settings.tick_interval[1] then return end
+	--------------------
+	score,avg_length = isIndoorThroughRaycast()
+	loadReverb("GENERIC")
+	print("score: "..tostring(score))
+	print(avg_length)
+	--------------------
+end
+
+function on_game_start()
+	RegisterScriptCallback("on_option_change",on_option_change)
+	RegisterScriptCallback("actor_on_first_update",actor_on_first_update)
+	RegisterScriptCallback("actor_on_update",actor_on_update)
+	-- RegisterScriptCallback("actor_on_weapon_fired",actor_on_weapon_fired)
+	RegisterScriptCallback("actor_on_weapon_before_fire",actor_on_weapon_before_fire)
+	on_option_change(true)
+end
