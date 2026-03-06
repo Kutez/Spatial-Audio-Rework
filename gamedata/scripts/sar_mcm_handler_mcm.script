@@ -1,0 +1,126 @@
+local mcm_settings = sar_main.mcm_settings
+
+local function get_game_path()
+	local info = debug.getinfo(1,'S');
+	local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]] --- what the fuck even is this
+	local game_path = script_path:match("(.*)gamedata"):match("(.*)bin"):gsub("/", "\\")
+	return game_path
+end
+
+function get_mcm_val(i)
+	if i == "input" then
+		return 0
+	end
+	if i == "check" then
+		return 1
+	end
+	if i == "track" then
+		return 2
+	end
+	return
+end
+
+function table_find(t,f)
+	for i,v in pairs(t) do
+		if v == f then
+			return i
+		end
+	end
+end
+
+local editor_properties = {
+	{ name = "density",                 min = 0.0,   max = 1.0   },
+	{ name = "diffusion",               min = 0.0,   max = 1.0   },
+	{ name = "gain",                    min = 0.0,   max = 1.0   },
+	{ name = "gain_hf",                 min = 0.0,   max = 1.0   },
+	{ name = "gain_lf",                 min = 0.0,   max = 1.0   },
+	{ name = "decay_time",              min = 0.1,   max = 20.0  },
+	{ name = "decay_hf_ratio",          min = 0.1,   max = 20.0  },
+	{ name = "decay_lf_ratio",          min = 0.1,   max = 20.0  },
+	{ name = "reflections_gain",        min = 0.0,   max = 3.16  },
+	{ name = "reflections_delay",       min = 0.0,   max = 0.3   },
+	{ name = "late_reverb_gain",        min = 0.0,   max = 10.0  },
+	{ name = "late_reverb_delay",       min = 0.0,   max = 0.1   },
+	{ name = "echo_time",               min = 0.075, max = 0.25  },
+	{ name = "echo_depth",              min = 0.0,   max = 1.0   },
+	{ name = "modulation_time",         min = 0.04,  max = 4.0   },
+	{ name = "modulation_depth",        min = 0.0,   max = 1.0   },
+	{ name = "air_absorption_gain_hf",  min = 0.892, max = 1.0   },
+	{ name = "hf_reference",            min = 1000.0, max = 20000.0 },
+	{ name = "lf_reference",            min = 20.0,  max = 1000.0 },
+	{ name = "room_rolloff_factor",     min = 0.0,   max = 10.0  },
+	{ name = "decay_hf_limit",          min = 0,     max = 1     },
+}
+
+function on_mcm_load()
+	----------------- main mcm -------------------
+	local sorted_order = {}
+	for i,v in pairs(mcm_settings) do
+		sorted_order[#sorted_order+1] = v.order
+	end
+	table.sort(sorted_order)
+	local set = {{id = "title", type = "slide", text = "ui_mcm_menu_spatial_audio", size = {512, 50}, spacing = 20},}
+	for i,v in pairs(mcm_settings) do
+		local option = {id = i,type = v[2], val = get_mcm_val(v[2]), min = v[3], max = v[4], step = v[5], def = v[1], text = "ui_mcm_spatial_audio_"..i, clr = {200, 200, 255, 255}}
+		set[table_find(sorted_order,v.order)+1] = option
+	end
+
+	----------------- editor mcm
+	local editor_mcm = {
+		{id = "desc_editor1", type = "desc", text = "ui_mcm_spatial_audio_desc_editor1", clr = {200, 200, 255, 255}},
+		{id = "enable_editor", type = "check", val = 1, def = false},
+		{id = "load_reverb_name", type = "input", val = 0, def = "GENERIC"},
+		{id = "load_reverb", type = "check", val = 1, def = false},
+	}
+	for i,v in pairs(editor_properties) do
+		editor_mcm[#editor_mcm+1] = {id = v.name, cmd = "snd_efx_reverb_overwrite_"..v.name, min = v.min, max = v.max, step = 0.01, val = 2, type = "track"} 
+	end
+	editor_mcm[#editor_mcm+1] = {id = "reverb_name", type = "input", val = 0, def = "[INSERT REVERB NAME]"}
+	editor_mcm[#editor_mcm+1] = {id = "export", type = "check", val = 1, def = false}
+	editor_mcm[#editor_mcm+1] =	{id = "desc_editor2", type = "desc", text = "ui_mcm_spatial_audio_desc_editor2", clr = {200, 200, 255, 255}}
+	editor_mcm[#editor_mcm+1] = {id = "desc_editor3", type = "desc", text = "ui_mcm_spatial_audio_desc_editor3", clr = {200, 200, 255, 255}}
+	editor_mcm[#editor_mcm+1] = {id = "desc_editor4", type = "desc", text = "ui_mcm_spatial_audio_desc_editor4", clr = {200, 200, 255, 255}}
+	editor_mcm[#editor_mcm+1] = {id = "desc_editor5", type = "desc", text = "ui_mcm_spatial_audio_desc_editor5", clr = {200, 200, 255, 255}}
+	editor_mcm[#editor_mcm+1] = {id = "desc_editor6", type = "desc", text = "ui_mcm_spatial_audio_desc_editor6", clr = {200, 200, 255, 255}}
+
+	return {id = "spatial_audio", gr = 
+	{{ id= "sar_main", sh = true, gr = set},{ id = "sar_editor", sh=true, gr=editor_mcm}}}
+end
+
+function on_option_change(mcm)
+	if not mcm then return end
+	for i,v in pairs(mcm_settings) do
+		if v[2]~="desc" and v[2]~="line"  then
+			mcm_settings[i][1] = ui_mcm.get("spatial_audio/sar_main/"..i)
+		end
+	end
+	if ui_mcm.get("spatial_audio/sar_editor/enable_editor") then
+		if ui_mcm.get("spatial_audio/sar_editor/load_reverb") then
+			sar_main.loadReverb(ui_mcm.get("spatial_audio/sar_editor/load_reverb_name"))
+			ui_mcm.set("spatial_audio/sar_editor/load_reverb",false)
+		end
+		if ui_mcm.get("spatial_audio/sar_editor/export") then
+			exportPreset(ui_mcm.get("spatial_audio/sar_editor/reverb_name"))
+			ui_mcm.set("spatial_audio/sar_editor/export",false)
+		end
+	end
+end
+
+function exportPreset(name)
+	local exportString = "local ".. name.." = {\n"
+	local preset_table = {}
+	for i,v in pairs(editor_properties) do
+		preset_table[v.name] = ui_mcm.get("spatial_audio/sar_editor/"..v.name)
+		exportString = exportString.."    "..v.name.." = "..ui_mcm.get("spatial_audio/sar_editor/"..v.name)..",\n"
+	end
+	sar_reverb_preset.ReverbPresets[name] = preset_table
+	exportString = exportString.."}\nsar_reverb_preset.ReverbPresets."..name.." = ".. name
+	local file = io.open(get_game_path().."gamedata\\scripts\\"..name.."_preset_inject.script", "w")
+	file:write(exportString)
+	file:close()
+end
+
+function on_game_start()
+	RegisterScriptCallback("on_option_change",on_option_change)
+	on_option_change(true)
+end

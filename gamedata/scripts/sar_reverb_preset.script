@@ -1,15 +1,7 @@
--- how 2 add custom preset:
--- 1. copy existing preset, rename the preset
--- 2. type in your custom value, save the file
--- 3. in the mod mcm, type in your preset name into the preset setting
--- 4. done, load the game and start banging
--- Also you then can change the value in here then reload the save to see changed value in-game, no need to restart the game
-
 -- MORE PRESET IN "SAR_DOC/extra_preset.script" inside the mod folder (separate them to save memory)
 -- PLEASE REFER THE "Effects Extension Guide.pdf" from page 96 inside "SAR-DOC" for more detail on the each propery
 
 -- if you create a good preset, feel free to share it + video showcase on the discord channel of the mod in Anomaly/GAMMA server
-
 ReverbPresets = {
 
     -- Generic Presets
@@ -61,30 +53,6 @@ ReverbPresets = {
         decay_hf_limit = 1,
     },
 
-    PADDEDCELL = {
-        density = 0.1715,
-        diffusion = 1.0000,
-        gain = 0.3162,
-        gain_hf = 0.0010,
-        gain_lf = 1.0000, 	
-        decay_time = 0.1700,
-        decay_hf_ratio = 0.1000,
-        decay_lf_ratio = 1.0000,
-        reflections_gain = 0.2500,
-        reflections_delay = 0.0010,
-        late_reverb_gain = 1.2691,
-        late_reverb_delay = 0.0020,
-        echo_time = 0.2500,
-        echo_depth = 0.0000,
-        modulation_time = 0.2500,
-        modulation_depth = 0.0000,
-        air_absorption_gain_hf = 0.9943,
-        hf_reference = 5000.0000,
-        lf_reference = 250.0000,
-        room_rolloff_factor = 0.0000,
-        decay_hf_limit = 1,
-    },
-
     ROOM = {
         density = 0.4287,
         diffusion = 1.0000,
@@ -98,30 +66,6 @@ ReverbPresets = {
         reflections_delay = 0.0020,
         late_reverb_gain = 1.0629,
         late_reverb_delay = 0.0030,
-        echo_time = 0.2500,
-        echo_depth = 0.0000,
-        modulation_time = 0.2500,
-        modulation_depth = 0.0000,
-        air_absorption_gain_hf = 0.9943,
-        hf_reference = 5000.0000,
-        lf_reference = 250.0000,
-        room_rolloff_factor = 0.0000,
-        decay_hf_limit = 1,
-    },
-
-    BATHROOM = {
-        density = 0.1715,
-        diffusion = 1.0000,
-        gain = 0.3162,
-        gain_hf = 0.2512,
-        gain_lf = 1.0000,
-        decay_time = 1.4900,
-        decay_hf_ratio = 0.5400,
-        decay_lf_ratio = 1.0000,
-        reflections_gain = 0.6531,
-        reflections_delay = 0.0070,
-        late_reverb_gain = 3.2734,
-        late_reverb_delay = 0.0110,
         echo_time = 0.2500,
         echo_depth = 0.0000,
         modulation_time = 0.2500,
@@ -376,77 +320,7 @@ ReverbPresets = {
         decay_hf_limit = 1,
     },
 
-    FACTORY_CUPBOARD = {
-        density = 0.3071,
-        diffusion = 0.6300,
-        gain = 0.2512,
-        gain_hf = 0.7943,
-        gain_lf = 0.5012,
-        decay_time = 0.4900,
-        decay_hf_ratio = 0.6500,
-        decay_lf_ratio = 1.3100,
-        reflections_gain = 1.2589,
-        reflections_delay = 0.0100,
-        late_reverb_gain = 1.9953,
-        late_reverb_delay = 0.0320,
-        echo_time = 0.1070,
-        echo_depth = 0.0700,
-        modulation_time = 0.2500,
-        modulation_depth = 0.0000,
-        air_absorption_gain_hf = 0.9943,
-        hf_reference = 3762.6001,
-        lf_reference = 362.5000,
-        room_rolloff_factor = 0.0000,
-        decay_hf_limit = 1,
-    },
 
-    FACTORY_COURTYARD = {
-        density = 0.3071,
-        diffusion = 0.5700,
-        gain = 0.3162,
-        gain_hf = 0.3162,
-        gain_lf = 0.6310,
-        decay_time = 2.3200,
-        decay_hf_ratio = 0.2900,
-        decay_lf_ratio = 0.5600,
-        reflections_gain = 0.2239,
-        reflections_delay = 0.1400,
-        late_reverb_gain = 0.3981,
-        late_reverb_delay = 0.0390,
-        echo_time = 0.2500,
-        echo_depth = 0.2900,
-        modulation_time = 0.2500,
-        modulation_depth = 0.0000,
-        air_absorption_gain_hf = 0.9943,
-        hf_reference = 3762.6001,
-        lf_reference = 362.5000,
-        room_rolloff_factor = 0.0000,
-        decay_hf_limit = 1,
-    },
-
-    FACTORY_ALCOVE = {
-        density = 0.3645,
-        diffusion = 0.5900,
-        gain = 0.2512,
-        gain_hf = 0.7943,
-        gain_lf = 0.5012,
-        decay_time = 3.1400,
-        decay_hf_ratio = 0.6500,
-        decay_lf_ratio = 1.3100,
-        reflections_gain = 1.4125,
-        reflections_delay = 0.0100,
-        late_reverb_gain = 1.0000,
-        late_reverb_delay = 0.0380,
-        echo_time = 0.1140,
-        echo_depth = 0.1000,
-        modulation_time = 0.2500,
-        modulation_depth = 0.0000,
-        air_absorption_gain_hf = 0.9943,
-        hf_reference = 3762.6001,
-        lf_reference = 362.5000,
-        room_rolloff_factor = 0.0000,
-        decay_hf_limit = 1,
-    },
     -- Outdoors Presets
 
     OUTDOORS_BACKYARD = {

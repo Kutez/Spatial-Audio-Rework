@@ -3,122 +3,131 @@
 	<string id="ui_mcm_menu_spatial_audio">
 		<text>Spatial Audio Rework</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_enable">
+	<string id="ui_mcm_menu_sar_main">
+		<text>Main</text>
+	</string>
+	<string id="ui_mcm_menu_sar_editor">
+		<text>Effect Editor</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_main_enable">
 		<text>Enable</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_tick_interval">
+	<string id="ui_mcm_spatial_audio_sar_editor_enable_editor">
+		<text>Enable</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_main_tick_interval">
 		<text>Tick Interval (in ms)</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_interpolation_interval">
+	<string id="ui_mcm_spatial_audio_sar_main_interpolation_interval">
 		<text>Interpolation Interval</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_length_interpolation_interval">
+	<string id="ui_mcm_spatial_audio_sar_main_length_interpolation_interval">
 		<text>Length Interpolation Interval</text>
 	</string>
-		<string id="ui_mcm_spatial_audio_interpolation_interval_desc">
+		<string id="ui_mcm_spatial_audio_sar_main_interpolation_interval_desc">
 		<text>Interpolation time from room size value to another. shorter time will result in sharper jump in value, this is to prevent the effect from jitter too much</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_volume">
+	<string id="ui_mcm_spatial_audio_sar_main_volume">
 		<text>Volume</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_ray_bounce_count">
+	<string id="ui_mcm_spatial_audio_sar_main_ray_bounce_count">
 		<text>Ray Bounce Count</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_npc_ray_bounce_count">
+	<string id="ui_mcm_spatial_audio_sar_main_npc_ray_bounce_count">
 		<text>NPC Ray Bounce Count</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_ray_length_mult">
+	<string id="ui_mcm_spatial_audio_sar_main_ray_length_mult">
 		<text>Ray lengTh</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_dbug">
+	<string id="ui_mcm_spatial_audio_sar_main_dbug">
 		<text>Debug Mode</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_ray_dbug">
+	<string id="ui_mcm_spatial_audio_sar_main_ray_dbug">
 		<text>Ray Debug Mode</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_show_replaced_sound">
+	<string id="ui_mcm_spatial_audio_sar_main_show_replaced_sound">
 		<text>Show Replaced Sound</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_upper_threshold">
+	<string id="ui_mcm_spatial_audio_sar_main_upper_threshold">
 		<text>Upper Threshold</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_upper_threshold_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_upper_threshold_desc">
 		<text>If indoor score (the amount of ray hit) is above this threshold, the effect will be one full value and the custom indoor sound will play</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_lower_threshold">
+	<string id="ui_mcm_spatial_audio_sar_main_lower_threshold">
 		<text>Lower Threshold</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_lower_threshold_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_lower_threshold_desc">
 		<text>If indoor score (the amount of ray hit) is above this threshold, the reverb affect will start affecting the sound</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_small_preset">
+	<string id="ui_mcm_spatial_audio_sar_main_small_preset">
 		<text>Small Room Preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_small_preset_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_small_preset_desc">
 		<text>Reverb preset to use in small room</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_small_strength">
+	<string id="ui_mcm_spatial_audio_sar_main_small_strength">
 		<text>Small Preset Strength</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_small_strength_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_small_strength_desc">
 		<text>Basically how "reverb" the effect is, 0 is no reverb at all, 1 is the effect will be on full</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_small_length">
+	<string id="ui_mcm_spatial_audio_sar_main_small_length">
 		<text>Distance for small preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_small_length_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_small_length_desc">
 		<text>If the ray hit points distance to the player is smaller than this, small preset will play</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_mid_preset">
+	<string id="ui_mcm_spatial_audio_sar_main_mid_preset">
 		<text>Medium Room Preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_mid_preset_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_mid_preset_desc">
 		<text>Reverb preset to use in medium room</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_mid_strength">
+	<string id="ui_mcm_spatial_audio_sar_main_mid_strength">
 		<text>Medium Preset Strength</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_mid_strength_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_mid_strength_desc">
 		<text>Basically how "reverb" the effect is, 0 is no reverb at all, 1 is the effect will be on full</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_mid_length">
+	<string id="ui_mcm_spatial_audio_sar_main_mid_length">
 		<text>Distance for medium preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_mid_length_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_mid_length_desc">
 		<text>If the ray hit points distance to the player is equal to this, medium preset will play in full</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_large_preset">
+	<string id="ui_mcm_spatial_audio_sar_main_large_preset">
 		<text>Large Room Preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_large_preset_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_large_preset_desc">
 		<text>Reverb preset to use in large room</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_large_strength">
+	<string id="ui_mcm_spatial_audio_sar_main_large_strength">
 		<text>Large Preset Strength</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_large_strength_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_large_strength_desc">
 		<text>Basically how "reverb" the effect is, 0 is no reverb at all, 1 is the effect will be on full</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_large_length">
+	<string id="ui_mcm_spatial_audio_sar_main_large_length">
 		<text>Distance for large preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_large_length_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_large_length_desc">
 		<text>If the ray hit points distance to the player is equal or larger than this, large preset will play in full</text>
 	</string>
 
-	<string id="ui_mcm_spatial_audio_outdoor_preset">
+	<string id="ui_mcm_spatial_audio_sar_main_outdoor_preset">
 		<text>Outdoor Preset</text>
 	</string>
-	<string id="ui_mcm_spatial_audio_outdoor_preset_desc">
+	<string id="ui_mcm_spatial_audio_sar_main_outdoor_preset_desc">
 		<text>Reverb preset to use for outdoors (usually no reverb at all)</text>
 	</string>
 	
@@ -129,9 +138,110 @@
 		<text>Threshold Settings - How sensitive is the detection</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_desc_preset">
-		<text>Presets Settings - Reverb effect related settings, you can find preset name and how to make custom one in sar_reverb_preset.script inside gamedata/script</text>
+		<text>Presets Settings - Reverb effect related settings, you can find default presets in script/sar_reverb_preset.script or make custom preset in the Preset Editor tab</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_desc_dbug">
 		<text>Dev shits</text>
+	</string>
+
+
+	<string id="ui_mcm_spatial_audio_desc_editor1">
+		<text>Welcome to the Preset Editor, scroll down to see how to use</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_editor2">
+		<text>1. Enable the editor, then load your custom preset (or any other preset as base)</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_editor3">
+		<text>2. Start editing, edit the value, jump out to see the effect in action </text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_editor4">
+		<text>3. If you're done, scroll down, type in the name for custom preset (can overwrite existing preset), and press export. </text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_editor5">
+		<text>4. Bam! you can set the preset into the main setting in mcm. </text>
+	</string>
+	<string id="ui_mcm_spatial_audio_desc_editor6">
+		<text>Documentation for all effect is in mod-folder/SAR-DOC/Effect Extension Guide.pdf</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_load_reverb_name">
+		<text>Load Reverb Name</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_load_reverb_name">
+		<text>Load Reverb Name</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_load_reverb">
+		<text>Load</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_edit">
+		<text>Enable Edit Mode</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_reverb_name">
+		<text>Export as Reverb Name</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_export">
+		<text>Export</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_density">
+		<text>Density</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_diffusion">
+		<text>Diffusion</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_gain">
+		<text>Gain</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_gain_hf">
+		<text>Gain HF</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_gain_lf">
+		<text>Gain LF</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_decay_time">
+		<text>Decay Time</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_decay_hf_ratio">
+		<text>Decay HF Ratio</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_decay_lf_ratio">
+		<text>Decay LF Ratio</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_reflections_gain">
+		<text>Reflections Gain</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_reflections_delay">
+		<text>Reflections Delay</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_late_reverb_gain">
+		<text>Late Reverb Gain</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_late_reverb_delay">
+		<text>Late Reverb Delay</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_echo_time">
+		<text>Echo Time</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_echo_depth">
+		<text>Echo Depth</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_modulation_time">
+		<text>Modulation Time</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_modulation_depth">
+		<text>Modulation Depth</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_air_absorption_gain_hf">
+		<text>Air Absorption Gain HF</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_hf_reference">
+		<text>HF Reference</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_lf_reference">
+		<text>LF Reference</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_room_rolloff_factor">
+		<text>Room Rolloff Factor</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_editor_decay_hf_limit">
+		<text>Decay HF Limit</text>
 	</string>
 </string_table>

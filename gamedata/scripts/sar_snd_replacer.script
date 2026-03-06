@@ -1,5 +1,4 @@
-local mcm_settings = sar_main_mcm.mcm_settings
-
+local mcm_settings = sar_main.mcm_settings
 ------------------------
 function print(a,...)
 	if mcm_settings.dbug[1] then
@@ -59,8 +58,8 @@ function on_before_play_hud_sound(alias, parent, result)
 	local section = get_wp_sec(parent)
 	local line = returnSoundSectionName(alias,section,parent)
 	if section and line then
-		local score = sar_main_mcm.current_score
-		local lenghts = sar_main_mcm.current_lenght
+		local score = sar_main.current_score
+		local lenghts = sar_main.current_lenght
 		if score>mcm_settings.upper_threshold[1] then
 			result.volume_mult = mcm_settings.volume[1]
 			result.section = section

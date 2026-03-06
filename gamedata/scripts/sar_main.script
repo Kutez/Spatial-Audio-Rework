@@ -2,7 +2,13 @@ local last_tick = 0
 volume = 0
 current_score = 0
 current_length = 0
-local epsilon = 0.01
+local target_score = 0
+local target_length = 0
+local epsilon = 0.0001
+
+local t = {
+	hello = 1,
+}
 
 ----{pitch,yaw,length,length priority,indoor detection priority,player's yaw indepentdent} in degree, length priority == 0 mean no contribute to lengths calculation
 local ray_dir_configs = {
@@ -36,7 +42,7 @@ local material_black_list = {
 local lengthMultPerBouce = {1,0.9,0.8,0.7,0.65}
 
 local underground_levels = {"jupiter_underground", "l03u_agr_underground", "l08u_brainlab", "l13_generators", "labx8", "l12u_sarcofag", "l10u_bunker", "l04u_labx18"}
----------------------MCM
+
 mcm_settings = {
 	enable = {true, "check",nil,nil,nil,order = 1},
 	volume = {3, "track",0,5,0.1,order = 2},
@@ -80,42 +86,6 @@ mcm_settings = {
 	show_replaced_sound = {false, "check",nil,nil,nil,order = 101}
 }
 
-function get_mcm_val(i)
-	if i == "input" then
-		return 0
-	end
-	if i == "check" then
-		return 1
-	end
-	if i == "track" then
-		return 2
-	end
-	return
-end
-
-function on_mcm_load()
-	local sorted_order = {}
-	for i,v in pairs(mcm_settings) do
-		sorted_order[#sorted_order+1] = v.order
-	end
-	table.sort(sorted_order)
-	local set = {{id = "title", type = "slide", text = "ui_mcm_menu_spatial_audio", size = {512, 50}, spacing = 20},}
-	for i,v in pairs(mcm_settings) do
-		local option = {id = i,type = v[2], val = get_mcm_val(v[2]), min = v[3], max = v[4], step = v[5], def = v[1], text = "ui_mcm_spatial_audio_"..i, clr = {200, 200, 255, 255}}
-		set[table_find(sorted_order,v.order)+1] = option
-	end
-	return {id = "spatial_audio", sh=true, gr = set}
-end
-
-function on_option_change(mcm)
-	if not mcm then return end
-	for i,v in pairs(mcm_settings) do
-		if v[2]~="desc" and v[2]~="line"  then
-			mcm_settings[i][1] = ui_mcm.get("spatial_audio/"..i)
-		end
-	end
-end
-------------------------
 local function print(a,...)
 	if not mcm_settings.dbug[1] then return end
 	local type_ = type
@@ -215,7 +185,6 @@ function actor_on_first_update(wpn,gun)
 	volume = mcm_settings.volume[1]
 	exec_console_cmd("snd_efx " .. 1)
 	exec_console_cmd("snd_efx_reverb_overwrite " .. 1)
-	on_option_change(true)
 end
 
 function fireRay(dir,length,max_bounce,fire_pos,dont_check)
@@ -244,6 +213,7 @@ function fireRay(dir,length,max_bounce,fire_pos,dont_check)
 		end
 
 		if result.in_contact then
+			-- check if ray hit position is indoor (fire a ray upward to see if it hit anything)
 			if not dont_check then
 				local check_score = 0
 				for i,v in pairs(per_bouce_ray_dir_config) do
@@ -324,8 +294,8 @@ function getPreset(input)
 	elseif type(input) == "string" then
 		local preset = sar_reverb_preset.ReverbPresets[input]
 		if not preset then
-			getPreset("GENERIC")
 			printf("! PRESET "..input.." NOT FOUND, PLEASE TYPE THE PRESET NAME CORRECTLY, SWTICHED TO GENERIC PRESET INSTEAD")
+			return getPreset("GENERIC")
 		else
 			return preset
 		end
@@ -348,38 +318,22 @@ function lerpReverb(preset1,preset2,alpha)
 	return lerped_preset
 end
 
-function actor_on_update()
-	if not mcm_settings.enable[1] then return end
+function actor_on_update(_,delta)
+	if not mcm_settings.enable[1] or ui_mcm.get("spatial_audio/sar_editor/enable_editor") then return end
 	if mcm_settings.ray_dbug[1] then return end
-	if (time_global() - last_tick)<mcm_settings.tick_interval[1] then return end
-	--------------------
-	local score
-	local length
-	score,length = isIndoorThroughRaycast()
-	local new_score = 0
-	if score>mcm_settings.lower_threshold[1] then
-		new_score = (score-mcm_settings.lower_threshold[1])/(1-mcm_settings.lower_threshold[1])
-		if new_score>mcm_settings.upper_threshold[1] then
-			new_score = 1
-		end
-	end
 
-	if (new_score-current_score)<0 and current_score<0.25 then
+	-- dectection interpolation ---------------
+	if (target_score-current_score)<0 and current_score<0.25 then
 		current_score = 0
-	elseif (new_score-current_score)>0 and current_score>0.9 then
+	elseif (target_score-current_score)>0 and current_score>0.9 then
 		current_score = 1
 	else
-		current_score = current_score+(new_score-current_score)*0.98*(mcm_settings.tick_interval[1]/mcm_settings.interpolation_interval[1])
+		current_score = current_score+(target_score-current_score)*0.98*(delta/mcm_settings.interpolation_interval[1])
 	end
 
-	if current_score<epsilon then
-		current_score = 0
-	elseif current_score>1-epsilon then
-		current_score = 1
-	end
+	current_length = math.max(epsilon,current_length+(target_length-current_length)*0.98*(delta/mcm_settings.length_interpolation_interval[1]))
 
-	current_length = math.max(epsilon,current_length+(length-current_length)*0.98*(mcm_settings.tick_interval[1]/mcm_settings.length_interpolation_interval[1]))
-
+	-- apply effect -----------------------
 	local preset_order = {"outdoor","small","mid","large"}
 
 	for i,type in pairs(preset_order) do
@@ -396,12 +350,27 @@ function actor_on_update()
 			break
 		end
 	end
+
+	if (time_global() - last_tick)<mcm_settings.tick_interval[1] then return end
+	--detection ---------------
+	local score
+	score,target_length = isIndoorThroughRaycast()
+	if score>mcm_settings.lower_threshold[1] then
+		target_score = (score-mcm_settings.lower_threshold[1])/(1-mcm_settings.lower_threshold[1])
+		if target_score>mcm_settings.upper_threshold[1] then
+			target_score = 1
+		end
+	else
+		target_score = 0
+	end
+
 	print("score: "..tostring(current_score))
 	print(current_length)
 	------------------
 	last_tick = time_global()
 end
 
+-- ray debug -------------------
 function actor_on_weapon_before_fire()
 	if not mcm_settings.enable[1] then return end
 	if not mcm_settings.ray_dbug[1] then return end
@@ -415,10 +384,8 @@ function actor_on_weapon_before_fire()
 end
 
 function on_game_start()
-	RegisterScriptCallback("on_option_change",on_option_change)
 	RegisterScriptCallback("actor_on_first_update",actor_on_first_update)
 	RegisterScriptCallback("actor_on_update",actor_on_update)
 	-- RegisterScriptCallback("actor_on_weapon_fired",actor_on_weapon_fired)
 	RegisterScriptCallback("actor_on_weapon_before_fire",actor_on_weapon_before_fire)
-	on_option_change(true)
 end
