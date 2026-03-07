@@ -158,7 +158,7 @@
 		<text>3. If you're done, scroll down, type in the name for custom preset (can overwrite existing preset), and press export. </text>
 	</string>
 	<string id="ui_mcm_spatial_audio_desc_editor5">
-		<text>4. Bam! you can set the preset into the main setting in mcm. </text>
+		<text>4. Bam! Now you can set the preset into the main setting in mcm. </text>
 	</string>
 	<string id="ui_mcm_spatial_audio_desc_editor6">
 		<text>Documentation for all effect is in mod-folder/SAR-DOC/Effect Extension Guide.pdf</text>
