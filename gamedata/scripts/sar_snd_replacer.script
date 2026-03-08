@@ -13,6 +13,7 @@ end
 function get_wp_sec(parent)
 	local wpn = db.actor:active_item()
 	if parent then
+		if not (IsStalker(parent) and parent:alive()) then return end
 		wpn = parent:active_item()
 	end
 	local sec
