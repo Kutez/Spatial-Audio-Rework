@@ -37,7 +37,7 @@
 		<text>NPC Ray Bounce Count</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_sar_main_ray_length_mult">
-		<text>Ray lengTh</text>
+		<text>Ray length</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_sar_main_dbug">
 		<text>Debug Mode</text>
