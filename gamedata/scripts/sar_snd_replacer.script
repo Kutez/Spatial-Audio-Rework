@@ -1,18 +1,57 @@
+local last_tick = 0
+
+----{pitch,yaw,lenght,lenght priority,indoor detection priority,player's yaw indepentdent} in degree, lenght priority == 0 mean no contribute to lenghts calculation
+local ray_dir_configs_npc = {
+	{180,		70,		70,		1,1,true},
+	{0,		60,		100,		1,1,true},
+}
+
+local cooldowns_table = {}
+
 local mcm_settings = sar_main.mcm_settings
-------------------------
-function print(a,...)
-	if mcm_settings.dbug[1] then
-		if type(a)=="table" then
-			printf("ze table\n%s", utils_data.print_table(a, false, true))
-		else
-			printf(tostring(a))
+
+local function print(...)
+	if not mcm_settings.dbug[1] then return end
+	local args = {...}
+	local printResult = ""
+	for i,v in ipairs(args) do
+		local type_ = type
+		if type_(v)=="table" then
+			printf("ze table \n%s", utils_data.print_table(v, false, true))
+		elseif type_(v) == "string" or type_(v) == "number" or type_(v) == "boolean" or type_(v) == "nil" then
+			printResult = printResult .. (i == 1 and "" or " , ") .. tostring(v)
+		elseif type_(v) == "userdata" then
+			if v.x and v.y and v.z then
+				printResult = printResult .. (i == 1 and "" or " , ") ..  "("..v.x.." , "..v.y.." , "..v.z..") "
+			end
 		end
 	end
+	printf(printResult)
+end
+
+function table_find(t,f)
+	for i,v in pairs(t) do
+		if v == f then
+			return i
+		end
+	end
+end
+
+function toRad(a)
+	return a* 0.017453292519943295769236907684886
+end
+
+function haveIndoorSound(parent)
+	local sec = get_wp_sec(parent)
+	if SYS_GetParam(sys_param_types.boolean, sec, "snd_shoot_indoor") == false then return true end
+	if SYS_GetParam(sys_param_types.boolean, sec, "snd_shoot_actor_indoor") == false then return true end
+	return false
 end
 
 function get_wp_sec(parent)
 	local wpn = db.actor:active_item()
 	if parent then
+		if not (IsStalker(parent) and parent:alive()) then return end
 		wpn = parent:active_item()
 	end
 	local sec
@@ -20,6 +59,21 @@ function get_wp_sec(parent)
 		sec = wpn:section()
 	end
 	return sec
+end
+
+function getPos(parent)
+	local pos = db.actor:position()
+	if parent then
+		pos = parent:position()
+	end
+	if IsMoveState("mcCrouch") and IsMoveState("mcAccel") then -- Prone
+		pos.y = pos.y + 0.4
+	elseif IsMoveState("mcCrouch") then
+		pos.y = pos.y + 1.2
+	else
+		pos.y = pos.y + 1.6
+	end
+	return pos
 end
 
 local indoor_snds_callback = {
@@ -37,12 +91,42 @@ local indoor_snds_callback = {
 	sndSilencerShotMisfireActor = "snd_silncer_shot_misfire_actor",
 }
 
+function isIndoor(parent)
+	if cooldowns_table[parent:id()] and cooldowns_table[parent:id()][1] and cooldowns_table[parent:id()][2] then 
+		return cooldowns_table[parent:id()][1],cooldowns_table[parent:id()][2] 
+	end
+	local dir = parent:direction()
+	local horz = dir:getH() -- Range 0 2pi
+	local vert = dir:getP()
+
+	local pointSum = 0
+	local lengthSum = 0
+	local pointsMultSum = 0
+	local lengthsMultSum = 0
+
+	for i,v in pairs(ray_dir_configs_npc) do
+		local point
+		local length
+		local new_dir = vector():setHP(horz + toRad(v[1]), toRad(v[2]) + vert)
+		if v[6] then
+        	new_dir = vector():setHP(horz + toRad(v[1]), toRad(v[2]))
+		end
+		point,length = sar_main.fireRay(new_dir:normalize(),v[3],mcm_settings.npc_ray_bounce_count[1],getPos(parent),true)
+
+		pointSum = pointSum+point*ray_dir_configs_npc[i][5]
+		lengthSum = lengthSum+length*point*ray_dir_configs_npc[i][4]
+
+		pointsMultSum = pointsMultSum+ray_dir_configs_npc[i][5]
+		lengthsMultSum = lengthsMultSum+ray_dir_configs_npc[i][4]
+	end
+
+	cooldowns_table[parent:id()] = {pointSum/pointsMultSum,lengthSum/lengthsMultSum,mcm_settings.npc_tick_interval[1]}
+	return pointSum/pointsMultSum,lengthSum/lengthsMultSum
+end
+
 function returnSoundSectionName(alias,section,parent)
 	if not parent or not section then return end
 	if indoor_snds_callback[alias] and SYS_GetParam(0, section, indoor_snds_callback[alias].."_indoor") then return indoor_snds_callback[alias].."_indoor" end
-	if alias == "sndSilencerShot" then
-		if SYS_GetParam(0, section, "snd_silncer_shoot_indoor") then return "snd_silncer_shoot_indoor" end
-	end
 	if parent:id() == AC_ID then
 		if string.find(alias,"Actor") then
 			local cus_alias = string.gsub(alias,"Actor","")
@@ -55,12 +139,19 @@ function returnSoundSectionName(alias,section,parent)
 end
 
 function on_before_play_hud_sound(alias, parent, result)
+	if not parent or not (IsStalker(parent) and parent:alive() and db.actor:position():distance_to_sqr(parent:position())<100*100) then return end
 	local section = get_wp_sec(parent)
 	local line = returnSoundSectionName(alias,section,parent)
 	if section and line then
 		local score = sar_main.current_score
-		local lenghts = sar_main.current_lenght
+		local lenghts = sar_main.current_length
+		if parent:id() ~= AC_ID and mcm_settings.enable_npc[1] then
+			score,lenghts = isIndoor(parent)
+		end
 		if score>mcm_settings.upper_threshold[1] then
+			if mcm_settings.show_replaced_sound[1] then
+				print("Replaced " .. line, section)
+			end
 			result.volume_mult = mcm_settings.volume[1]
 			result.section = section
 			result.line = line
@@ -68,6 +159,21 @@ function on_before_play_hud_sound(alias, parent, result)
 	end
 end
 
+function actor_on_update()
+	if time_global()-last_tick<250 then return end
+	-- print(cooldowns_table)
+	for i,v in pairs(cooldowns_table) do
+		if cooldowns_table[i] then
+			cooldowns_table[i][3] = cooldowns_table[i][3] - (time_global()-last_tick)
+			if cooldowns_table[i][3]<0 then
+				cooldowns_table[i] = nil
+			end
+		end
+	end
+	last_tick = time_global()
+end
+
 function on_game_start()
+	RegisterScriptCallback("actor_on_update",actor_on_update)
 	RegisterScriptCallback("on_before_play_hud_sound",on_before_play_hud_sound)
 end

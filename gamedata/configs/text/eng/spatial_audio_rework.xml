@@ -12,11 +12,20 @@
 	<string id="ui_mcm_spatial_audio_sar_main_enable">
 		<text>Enable</text>
 	</string>
+	<string id="ui_mcm_spatial_audio_sar_main_enable_npc">
+		<text>Enable NPC-specific Ray Detection</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_main_enable_npc_desc">
+		<text>This will detect indoor for each NPC when their gun is shot and is close enough from the player (100 unit), if the point is high enough, custom indoor sound will be play. Disable this will use actor detection instead. Disable it if you want extra performance </text>
+	</string>
 	<string id="ui_mcm_spatial_audio_sar_editor_enable_editor">
 		<text>Enable</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_sar_main_tick_interval">
 		<text>Tick Interval (in ms)</text>
+	</string>
+	<string id="ui_mcm_spatial_audio_sar_main_npc_tick_interval">
+		<text>NPC Tick Interval (in ms)</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_sar_main_interpolation_interval">
 		<text>Interpolation Interval</text>
@@ -130,7 +139,10 @@
 	<string id="ui_mcm_spatial_audio_sar_main_outdoor_preset_desc">
 		<text>Reverb preset to use for outdoors (usually no reverb at all)</text>
 	</string>
-	
+
+	<string id="ui_mcm_spatial_audio_desc_npc">
+		<text>NPC Settings</text>
+	</string>
 	<string id="ui_mcm_spatial_audio_desc_ray">
 		<text>Rays Settings</text>
 	</string>
@@ -161,7 +173,7 @@
 		<text>4. Bam! Now you can set the preset into the main setting in mcm. </text>
 	</string>
 	<string id="ui_mcm_spatial_audio_desc_editor6">
-		<text>Documentation for all effect is in mod-folder/SAR-DOC/Effect Extension Guide.pdf</text>
+		<text>Documentation for all effect is in mod-folder/SAR-DOC/Effect Extension Guide.pdf. After you exported the preset, you can find your preset's file in mo2/overwrite/gamedata/script/[your_preset_name]_preset_inject.script, you can share the file to share your preset</text>
 	</string>
 	<string id="ui_mcm_spatial_audio_sar_editor_load_reverb_name">
 		<text>Load Reverb Name</text>
