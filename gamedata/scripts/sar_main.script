@@ -47,7 +47,7 @@ local underground_levels = {"jupiter_underground", "l03u_agr_underground", "l08u
 mcm_settings = {
 	enable = {true, "check",nil,nil,nil,order = 1},
 	volume = {1, "track",0,5,0.1,order = 2},
-	ray_per_frame_mult = {2, "track",1,3,1,order = 4},
+	ray_per_frame_mult = {1, "track",1,3,1,order = 4},
 	interpolation_interval = {1200, "track",100,2000,100,order = 5},
 	size_interpolation_interval = {750, "track",100,2000,100,order = 6},
 
