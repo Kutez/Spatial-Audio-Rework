@@ -1,11 +1,8 @@
 local mcm_settings = sar_main.mcm_settings
 
-local function get_game_path()
-	local info = debug.getinfo(1,'S');
-	local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]] --- what the fuck even is this
-	local game_path = script_path:match("(.*)gamedata"):match("(.*)bin"):gsub("/", "\\")
-	return game_path
-end
+local dp = kute_common
+local get_game_path = dp.get_game_path
+local table_find = dp.table_find
 
 function get_mcm_val(i)
 	if i == "input" then
@@ -18,14 +15,6 @@ function get_mcm_val(i)
 		return 2
 	end
 	return
-end
-
-function table_find(t,f)
-	for i,v in pairs(t) do
-		if v == f then
-			return i
-		end
-	end
 end
 
 local editor_properties = {
@@ -94,6 +83,7 @@ function on_option_change(mcm)
 			mcm_settings[i][1] = ui_mcm.get("spatial_audio/sar_main/"..i)
 		end
 	end
+	
 	if ui_mcm.get("spatial_audio/sar_editor/enable_editor") then
 		if ui_mcm.get("spatial_audio/sar_editor/load_reverb") then
 			sar_main.loadReverb(ui_mcm.get("spatial_audio/sar_editor/load_reverb_name"))
@@ -114,8 +104,8 @@ function exportPreset(name)
 		exportString = exportString.."    "..v.name.." = "..ui_mcm.get("spatial_audio/sar_editor/"..v.name)..",\n"
 	end
 	sar_reverb_preset.ReverbPresets[name] = preset_table
-	exportString = exportString.."}\nsar_reverb_preset.ReverbPresets."..name.." = ".. name
-	local file = io.open(get_game_path().."gamedata\\scripts\\"..name.."_preset_inject.script", "w")
+	exportString = exportString.."}\nsar_reverb_preset.ReverbPresets[\""..name.."\"] = ".. name
+	local file = io.open(get_game_path().."gamedata\\scripts\\zzz_"..name.."_preset_inject.script", "w")
 	file:write(exportString)
 	file:close()
 end

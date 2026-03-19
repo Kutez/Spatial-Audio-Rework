@@ -1,0 +1,135 @@
+--- common dependencies for kute stuff
+
+function print(...)
+	local args = {...}
+	local printResult = ""
+	for i,v in ipairs(args) do
+		local type_ = type
+		if type_(v)=="table" then
+			printf("ze table \n%s", utils_data.print_table(v, false, true))
+		elseif type_(v) == "string" or type_(v) == "number" or type_(v) == "boolean" or type_(v) == "nil" then
+			printResult = printResult .. (i == 1 and "" or " ") .. tostring(v)
+		elseif type_(v) == "userdata" then
+			if v.x and v.y and v.z then
+				printResult = printResult .. (i == 1 and "" or " ") ..  "("..v.x.." , "..v.y.." , "..v.z..") "
+			elseif v.x and v.y then
+				printResult = printResult .. (i == 1 and "" or " ") ..  "("..v.x.." , "..v.y..") "
+			end
+		end
+	end
+	printf(printResult)
+end
+
+local sys_param_types = {
+    string = 0,
+    boolean = 1,
+    number = 2
+}
+
+function concat(a, b)
+    return table.move(b, 1, #b, #a + 1, a)
+end
+
+function table_find(t,f)
+	for i,v in pairs(t) do
+		if v == f then
+			return i
+		end
+	end
+end
+
+function getAvg(tabl)
+	local s = 0
+	for i = 1,#tabl do
+		s = s+tabl[i]
+	end
+	return s/#tabl
+end
+
+function toRad(a)
+	return a* 0.017453292519943295769236907684886
+end
+
+local wp_sec = {}
+function get_wp_sec(parent)
+	if not parent then parent = db.actor end
+
+	local id = parent:id()
+	if wp_sec[id] then return wp_sec[id] end
+
+	if not (IsStalker(parent) and parent:alive()) then return end
+	local wpn = parent:active_item()
+
+	local sec
+	if wpn then
+		sec = wpn:section()
+	end
+	wp_sec[id] = sec
+	return sec
+end
+
+local charPos = {}
+function getCharPos(parent)
+	if not parent then parent = db.actor end
+
+	local id = parent:id()
+	if charPos[id] then return charPos[id] end
+
+	local pos = vector():set(parent:position())
+	if IsMoveState("mcCrouch") and IsMoveState("mcAccel") then -- Prone
+		pos.y = pos.y + 0.4
+	elseif IsMoveState("mcCrouch") then
+		pos.y = pos.y + 1.2
+	else
+		pos.y = pos.y + 1.6
+	end
+
+	charPos[id] = pos
+	return pos
+end
+
+function lerp(a,b,alpha)
+	return (1-alpha)*a+alpha*b
+end
+
+function nextTick(f, ...)
+	local args = {...}
+	AddUniqueCall(function()
+		f(unpack(args))
+		return true
+	end)
+end
+
+function clamp(x, min, max)
+  return x < min and min or (x > max and max or x)
+end
+
+function getSummation(n)
+	return n*(n+1)*0.5
+end
+
+function get_game_path()
+	local info = debug.getinfo(1,'S');
+	local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]] --- what the fuck even is this
+	local game_path = script_path:match("(.*)gamedata"):match("(.*)bin"):gsub("/", "\\")
+	return game_path
+end
+
+function actor_on_update() -- caching results
+	charPos = {}
+	wp_sec = {}
+end
+
+function on_game_start()
+	RegisterScriptCallback("actor_on_update",actor_on_update)
+end
+
+function compact(t)
+    local result = {}
+    for i = 1, #t do
+        if t[i] ~= nil then
+            result[#result + 1] = t[i]
+        end
+    end
+    return result
+end
