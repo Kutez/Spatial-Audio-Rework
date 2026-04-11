@@ -110,7 +110,7 @@ function on_before_play_hud_sound(alias, parent, result)
 		if parent:id() ~= AC_ID and mcm_settings.enable_npc[1] then
 			score,lenghts = isIndoor(parent)
 		end
-		if score>mcm_settings.upper_threshold[1] then
+		if score>mcm_settings.cus_snd_threshold[1] then
 			if mcm_settings.show_replaced_sound[1] then
 				print("Replaced " .. line, section)
 			end

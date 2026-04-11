@@ -62,7 +62,7 @@ function on_mcm_load()
 		{id = "load_reverb", type = "check", val = 1, def = false},
 	}
 	for i,v in pairs(editor_properties) do
-		editor_mcm[#editor_mcm+1] = {id = v.name, cmd = "snd_efx_reverb_overwrite_"..v.name, min = v.min, max = v.max, step = 0.01, val = 2, type = "track"} 
+		editor_mcm[#editor_mcm+1] = {id = v.name, cmd = "snd_efx_reverb_overwrite_"..v.name, min = v.min, max = v.max, step = 0.0001, val = 2, type = "track"} 
 	end
 	editor_mcm[#editor_mcm+1] = {id = "reverb_name", type = "input", val = 0, def = "[INSERT REVERB NAME]"}
 	editor_mcm[#editor_mcm+1] = {id = "export", type = "check", val = 1, def = false}

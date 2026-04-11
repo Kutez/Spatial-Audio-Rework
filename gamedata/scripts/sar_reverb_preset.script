@@ -5,13 +5,38 @@
 ReverbPresets = {
 
     -- Generic Presets
+
+	CUS_VERYSMALL = {
+        density = 0.3645,
+        diffusion = 0.8200,
+        gain = 0.3325,
+        gain_hf = 0.7943,
+        gain_lf = 0.5420,
+        decay_time = 0.800,
+        decay_hf_ratio = 0.6500,
+        decay_lf_ratio = 1.3100,
+        reflections_gain = 0.7079,
+        reflections_delay = 0.0100,
+        late_reverb_gain = 1.7783,
+        late_reverb_delay = 0.0240,
+        echo_time = 0.1000,
+        echo_depth = 0.0700,
+        modulation_time = 0.2500,
+        modulation_depth = 0.0000,
+        air_absorption_gain_hf = 0.9943,
+        hf_reference = 3762.6001,
+        lf_reference = 362.5000,
+        room_rolloff_factor = 0.0000,
+        decay_hf_limit = 1,
+    },
+
     NO_REVERB = {
         density = 1.0000,
         diffusion = 1.0000,
         gain = 0,
         gain_hf = 0,
         gain_lf = 0,
-        decay_time = 1.4900,
+        decay_time = 0.1,
         decay_hf_ratio = 0.8300,
         decay_lf_ratio = 1.0000,
         reflections_gain = 0.0500,
