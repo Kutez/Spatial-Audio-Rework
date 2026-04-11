@@ -378,7 +378,7 @@ function actor_on_update(_,delta)
 				local reverb = lerpReverb("NO_REVERB",mcm_settings[type.."_preset"][1],mcm_settings[type.."_strength"][1])
 				local next_reverb = lerpReverb("NO_REVERB",mcm_settings[next_type.."_preset"][1],mcm_settings[next_type.."_strength"][1])
 
-				local size_delta = (type=="outdoor" and 1) or (current_size-mcm_settings[type.."_size"][1])/(mcm_settings[next_type.."_size"][1]-mcm_settings[type.."_size"][1])
+				local size_delta = (type == next_type and 1) or (current_size-mcm_settings[type.."_size"][1])/(mcm_settings[next_type.."_size"][1]-mcm_settings[type.."_size"][1])
 				
 				local final_reverb = lerpReverb(reverb,next_reverb,size_delta)
 
