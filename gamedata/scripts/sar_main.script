@@ -9,29 +9,12 @@ local current_score_index = 0
 local score_list = {}
 local size_list = {}
 
-----{pitch,yaw,length,priority} in degree, length priority == 0 mean no contribute to lengths calculation
--- local size_ray_dir_configs = {
---  ----------------- length ray ---------------
--- 	{0,		5,		180,1},
--- 	{20, 	5,		180,1},
--- 	{-20, 	5,		180,1},
--- 	{45, 	5,		180,1},
--- 	{-45, 	5,		180,1},
--- 	{160, 	5,		180,1},
--- 	{-160, 	5,		180,1},
--- 	{180, 	5,		180,1},
--- }
-
 local score_ray_dir_configs = {
 	{0,		60,		120,1},
 	{0,		90,		80,	1.5},
 	{90,	60,		120,1},
 	{-90,	60,		120,1},
 	{180,	60,		120,1},
-}
-
-local per_bouce_ray_dir_config = {
-	{0,90,50}
 }
 
 local material_black_list = {
@@ -133,35 +116,26 @@ function getSummationForLength(n)
 end
 
 function TrimTableForLength(t, trimPercent)
-	if #t<4 then return t end
+    if #t < 4 then return t end
     local data = {}
-    for i = 1, #t do
-        data[i] = t[i]
+    for i = 1, #t do data[i] = t[i] end
+    table.sort(data, function(a, b)
+        return (a and a[1] or 0) < (b and b[1] or 0)
+    end)
+    local n = #data
+    local trimCount = math.floor(n * trimPercent)
+    local final = {}
+    for i = trimCount + 1, n - trimCount do
+        final[#final + 1] = data[i]  -- no gaps
     end
-	table.sort(data,function (a,b)
-		if a and a[1] and b and b[1] then
-			return a[1]<b[1]
-		end
-	end)
-
-	local n = #data
-	local trimCount = math.floor(n * trimPercent)
-
-	local final = {}
-
-	for i = trimCount + 1, n - trimCount do
-		final[i] = data[i]
-	end
-
-	return final
+    return final
 end
-
 --------------------------
 function actor_on_first_update(wpn,gun)
 	exec_console_cmd("snd_efx " .. 1)
 	exec_console_cmd("snd_efx_reverb_overwrite " .. 1)
 	last_tick = time_global()
-	score = 0
+	current_score = 0
 end
 
 function on_option_change(mcm)
@@ -187,10 +161,14 @@ function getPreset(input)
 	end
 end
 
+local last_reverb_cache = {}
 function loadReverb(preset)
-	for i,v in pairs(getPreset(preset)) do
-		exec_console_cmd("snd_efx_reverb_overwrite_" .. i .. " " .. v)
-	end
+    for i, v in pairs(getPreset(preset)) do
+        if last_reverb_cache[i] ~= v then
+            exec_console_cmd("snd_efx_reverb_overwrite_" .. i .. " " .. v)
+            last_reverb_cache[i] = v
+        end
+    end
 end
 
 function lerpReverb(preset1,preset2,alpha)
@@ -274,7 +252,6 @@ function getScore()
 		scoreSum = scoreSum+score_list[i][1]
 		scoreMultSum = scoreMultSum+score_list[i][2]
 	end
-
 	------ process score ---------
 	local raw_score = scoreSum/scoreMultSum
 
@@ -294,7 +271,7 @@ function RayForSizeCal(dir,length,max_bounce,fire_pos,dont_check)
 	local bounced = 0
 	local point = 0
 	for bounce = 1,max_bounce do
-		local result = raycast(dir,length*lengthMultPerBouce[bounce],pos)
+		local result = raycast(dir,length*lengthMultPerBouce[bounce]*mcm_settings.ray_length_mult[1],pos)
 		if result.in_contact then
 			-- check if ray hit position is indoor (fire a ray upward to see if it hit anything)
 			local check_result = raycast(vector():set(0,1,0),70,vector():sub(result.position,vector():set(0,0.5,0)):add(vector():set(dir):mul(-0.5)))
@@ -316,16 +293,13 @@ end
 function getRoomSize()
 	if target_score==0 then target_size = 0 return end
 
-	local dir = device().cam_dir:normalize()
-	local horz = dir:getH() -- Range 0 2pi
-
 	local room_size_ray_count = 20
 	for i = 1,mcm_settings.ray_per_frame_mult[1] do
 		current_size_index = (current_size_index % room_size_ray_count) + 1
 		local new_dir = vector():setHP(math.pi*2*(current_size_index/room_size_ray_count), toRad(5))
 		local point,length = RayForSizeCal(new_dir:normalize(),180,mcm_settings.ray_bounce_count[1])
 
-		size_list[current_score_index] = {length,point}
+		size_list[current_size_index] = {length,point}
 	end
 	local lengthSum = 0
 	local lengthMultSum = 0
@@ -344,7 +318,7 @@ function getRoomSize()
 	end
 end
 
-local apply_frame = true
+local apply_frame = false
 
 function actor_on_update(_,delta)
 	if not mcm_settings.enable[1] or ui_mcm.get("spatial_audio/sar_editor/enable_editor") then return end
